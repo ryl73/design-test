@@ -25,3 +25,5 @@ Read-only smoke: `node scripts/smoke-health.mjs`. To verify database loss, stop 
 MinIO registry images could not be pulled in this environment. `Dockerfile.minio` builds official upstream release source at immutable tag object `f19c534b9f457773dcd043d977433e1a71525c3b` (commit `0d7408fc9...`); Go base and Debian runtime are pinned by digest. First build downloads Go dependencies and takes longer. MinIO remains the real server, with persistent private storage.
 
 The local override sets the data network to non-internal so Docker Desktop can publish its loopback test ports. Production retains `data.internal=true` and no dependency ports.
+
+Compose uses one raw `POSTGRES_PASSWORD` for the PostgreSQL server and both application launchers. `scripts/run-with-database.mjs` percent-encodes username/password/database when constructing DATABASE_URL for API and migration, preserving whitespace and reserved characters. Host commands still accept an explicit DATABASE_URL, whose credentials must be percent-encoded.

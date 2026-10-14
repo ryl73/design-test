@@ -11,6 +11,7 @@ COPY tsconfig.base.json prisma.config.ts ./
 COPY prisma prisma
 COPY packages/contracts packages/contracts
 COPY apps/api apps/api
+COPY scripts scripts
 RUN DATABASE_URL=postgresql://build:build@localhost/build npx prisma generate && npm run build -w @design-qa/contracts && npm run build -w @design-qa/api
 USER node
-CMD ["node", "apps/api/dist/main.js"]
+CMD ["node", "scripts/run-with-database.mjs", "node", "apps/api/dist/main.js"]

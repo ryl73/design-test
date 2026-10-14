@@ -7,7 +7,11 @@ x-api-env: &api-env
   HOST: 0.0.0.0
   PORT: '3000'
   APP_ORIGIN: ${APP_ORIGIN:?APP_ORIGIN HTTPS gateway required}
-  DATABASE_URL: postgresql://design_qa:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@postgres:5432/design_qa_dev
+  POSTGRES_USER: design_qa
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}
+  POSTGRES_HOST: postgres
+  POSTGRES_PORT: '5432'
+  POSTGRES_DB: design_qa_dev
   MINIO_ENDPOINT: http://minio:9000
   MINIO_BUCKET: ${MINIO_BUCKET:-design-qa-dev}
   MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:?MINIO_ACCESS_KEY required}
@@ -47,7 +51,7 @@ services:
   migrate:
     build: {context: .., dockerfile: infra/Dockerfile.api}
     environment: *api-env
-    command: ['npx', 'prisma', 'migrate', 'deploy']
+    command: ['node', 'scripts/run-with-database.mjs', 'npx', 'prisma', 'migrate', 'deploy']
     networks: [data]
     depends_on: {postgres: {condition: service_healthy}}
     restart: 'no'
