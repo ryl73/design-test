@@ -30,7 +30,8 @@ export class PagesService {
             if (data.archivedAt !== null)
                 active(page.archivedAt);
             if (data.url !== undefined) {
-                const variants = await tx.variant.findMany({ where: { pageId: id }, orderBy: { id: 'asc' } });
+                // Only inherited URLs change; explicit variant overrides retain their saved settings.
+                const variants = await tx.variant.findMany({ where: { pageId: id, urlOverride: null }, orderBy: { id: 'asc' } });
                 for (const variant of variants) {
                     await tx.$queryRaw `SELECT id FROM "Variant" WHERE id=${variant.id}::uuid FOR UPDATE`;
                     const effective = savedUrl(variant.urlOverride ?? data.url, this.config);

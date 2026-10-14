@@ -30,8 +30,11 @@ export class VariantsService {
             checkVersion(variant.version, version as number);
             if (data.archivedAt !== null)
                 active(variant.archivedAt);
-            const effective = savedUrl((data.urlOverride === undefined ? variant.urlOverride : data.urlOverride) ?? page.url, this.config);
-            effectiveProfile(effective, data.authProfileRef === undefined ? variant.authProfileRef : data.authProfileRef, this.config);
+            // Retired capture policy must not prevent archive or unrelated metadata edits.
+            if (data.urlOverride !== undefined || data.authProfileRef !== undefined) {
+                const effective = savedUrl((data.urlOverride === undefined ? variant.urlOverride : data.urlOverride) ?? page.url, this.config);
+                effectiveProfile(effective, data.authProfileRef === undefined ? variant.authProfileRef : data.authProfileRef, this.config);
+            }
             if (data.viewportWidth !== undefined && data.viewportWidth !== variant.viewportWidth && variant.currentBaselineId) {
                 const baseline = missing(await tx.baselineVersion.findUnique({ where: { id: variant.currentBaselineId }, include: { asset: true } }));
                 if (baseline.asset.width !== data.viewportWidth)

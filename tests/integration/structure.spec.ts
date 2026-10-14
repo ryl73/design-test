@@ -107,3 +107,32 @@ it('clears a current baseline only when width becomes incompatible, and preserve
     expect((await request(`/variants/${variant.id}`, 'PATCH', { version: 2, viewportWidth: 1440 })).body.currentBaselineId).toBeNull();
     expect(await db.client.baselineVersion.findUnique({ where: { id: baseline.id } })).not.toBeNull();
 });
+it('allows archive, restore and metadata edits after an operator retires a URL origin or profile', async () => {
+    const participant=(await request('/participants/me')).body;
+    const project=await db.client.project.create({data:{name:'Retired policy',authorId:participant.id}});
+    const page=await db.client.page.create({data:{projectId:project.id,name:'Retired page',url:'https://retired.example/page'}});
+    // Persisted settings represent saves made under an earlier operator configuration.
+    const variants=await Promise.all([
+        db.client.variant.create({data:{pageId:page.id,name:'Removed origin',viewportWidth:1280,viewportHeight:720}}),
+        db.client.variant.create({data:{pageId:page.id,name:'Removed profile',viewportWidth:1280,viewportHeight:720,urlOverride:'https://example.com/',authProfileRef:{profileId:'retired-profile',version:1}}}),
+    ]);
+    for(const variant of variants){
+        expect((await request(`/variants/${variant.id}`,'PATCH',{version:1,archived:true})).status).toBe(200);
+        expect((await request(`/variants/${variant.id}`,'PATCH',{version:2,archived:false})).status).toBe(200);
+        expect((await request(`/variants/${variant.id}`,'PATCH',{version:3,name:'Renamed after retirement'})).status).toBe(200);
+        expect((await request(`/variants/${variant.id}`)).body.version).toBe(4);
+    }
+    expect((await request(`/pages/${page.id}`,'PATCH',{version:1,archived:true})).status).toBe(200);
+    expect((await request(`/pages/${page.id}`,'PATCH',{version:2,archived:false})).status).toBe(200);
+    expect((await request(`/variants/${variants[0]!.id}`,'PATCH',{version:4,urlOverride:'https://retired.example/new'})).status).toBe(403);
+    expect((await request(`/variants/${variants[1]!.id}`,'PATCH',{version:4,urlOverride:'https://example.com/new'})).status).toBe(400);
+});
+it('does not revalidate unchanged variant URL overrides when changing a page URL',async()=>{
+    const participant=(await request('/participants/me')).body;
+    const project=await db.client.project.create({data:{name:'Override retirement',authorId:participant.id}});
+    const page=await db.client.page.create({data:{projectId:project.id,name:'Page',url:'https://example.com/'}});
+    await db.client.variant.create({data:{pageId:page.id,name:'Retired override',viewportWidth:1280,viewportHeight:720,urlOverride:'https://retired.example/',authProfileRef:{profileId:'retired-profile',version:1}}});
+    const result=await request(`/pages/${page.id}`,'PATCH',{version:1,url:'https://example.com/new'});
+    expect(result.status).toBe(200);
+    expect(result.body.url).toBe('https://example.com/new');
+});
