@@ -68,11 +68,11 @@
 
 **Зависимости:** 01. **Файлы:** `infra/compose.yml`, `infra/web/default.conf`, Dockerfile приложений, `apps/api/src/config/`, `apps/api/src/database/`, `apps/api/src/main.ts`.
 
-- [ ] Поднять PostgreSQL/MinIO с volume и healthcheck; добавить migration service/одноразовую команду запуска миграций.
-- [ ] Настроить web→API same-origin proxy; production config требует HTTPS корпоративного шлюза.
-- [ ] Добавить live/ready endpoints и startup validation обязательных настроек.
-- [ ] Настроить отдельную тестовую БД и bucket, чтобы интеграционные тесты не удаляли рабочие данные.
-- [ ] Выполнить smoke: API видит DB/storage; при отключении БД ready неуспешен, live остаётся доступным.
+- [x] Поднять PostgreSQL/MinIO с volume и healthcheck; добавить migration service/одноразовую команду запуска миграций.
+- [x] Настроить web→API same-origin proxy; production config требует HTTPS корпоративного шлюза.
+- [x] Добавить live/ready endpoints и startup validation обязательных настроек.
+- [x] Настроить отдельную тестовую БД и bucket, чтобы интеграционные тесты не удаляли рабочие данные.
+- [x] Выполнить smoke: API видит DB/storage; при отключении БД ready неуспешен, live остаётся доступным.
 
 **Готово:** воспроизводимый локальный запуск, реальные healthchecks; DB/MinIO не публикуются в production. Capture пока отключён до задачи 11.
 

@@ -10,8 +10,10 @@ coverage/
 .vscode/
 .DS_Store
 *.log
-storage/
+/storage/
 .local/
 .superpowers/
 playwright-report/
 test-results/
+
+apps/api/src/generated/

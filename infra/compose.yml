@@ -1,0 +1,93 @@
+name: design-qa-stage-a
+x-log: &log
+  driver: json-file
+  options: { max-size: '10m', max-file: '3' }
+x-api-env: &api-env
+  NODE_ENV: production
+  HOST: 0.0.0.0
+  PORT: '3000'
+  APP_ORIGIN: ${APP_ORIGIN:?APP_ORIGIN HTTPS gateway required}
+  DATABASE_URL: postgresql://design_qa:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@postgres:5432/design_qa_dev
+  MINIO_ENDPOINT: http://minio:9000
+  MINIO_BUCKET: ${MINIO_BUCKET:-design-qa-dev}
+  MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:?MINIO_ACCESS_KEY required}
+  MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:?MINIO_SECRET_KEY required}
+  SESSION_SIGNING_KEY: ${SESSION_SIGNING_KEY:?SESSION_SIGNING_KEY required}
+  CAPTURE_ENABLED: 'false'
+services:
+  postgres:
+    image: postgres:17.6-bookworm
+    environment:
+      POSTGRES_USER: design_qa
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}
+      POSTGRES_DB: design_qa_dev
+    volumes: [postgres-data:/var/lib/postgresql/data]
+    networks: [data]
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U design_qa -d design_qa_dev']
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    logging: *log
+  minio:
+    image: design-qa-minio:RELEASE.2025-04-22T22-12-26Z
+    build: {context: .., dockerfile: infra/Dockerfile.minio}
+    command: server /data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:?MINIO_ACCESS_KEY required}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:?MINIO_SECRET_KEY required}
+    volumes: [minio-data:/data]
+    networks: [data]
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    logging: *log
+  migrate:
+    build: {context: .., dockerfile: infra/Dockerfile.api}
+    environment: *api-env
+    command: ['npx', 'prisma', 'migrate', 'deploy']
+    networks: [data]
+    depends_on: {postgres: {condition: service_healthy}}
+    restart: 'no'
+    logging: *log
+  storage-init:
+    build: {context: .., dockerfile: infra/Dockerfile.api}
+    environment: *api-env
+    volumes: ['../scripts/init-storage.mjs:/app/scripts/init-storage.mjs:ro']
+    command: ['node', 'scripts/init-storage.mjs']
+    networks: [data]
+    depends_on: {minio: {condition: service_healthy}}
+    restart: 'no'
+    logging: *log
+  api:
+    build: {context: .., dockerfile: infra/Dockerfile.api}
+    environment: *api-env
+    networks: [frontend, data]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      storage-init: {condition: service_completed_successfully}
+    healthcheck:
+      test: ['CMD', 'node', '-e', "fetch('http://localhost:3000/api/v1/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    logging: *log
+  web:
+    build: {context: .., dockerfile: infra/Dockerfile.web}
+    ports: ['127.0.0.1:58080:80']
+    networks: [frontend]
+    depends_on: {api: {condition: service_healthy}}
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '-O', '/dev/null', 'http://127.0.0.1/api/v1/health/live']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    logging: *log
+networks:
+  frontend: {}
+  data: {internal: true}
+volumes:
+  postgres-data: {}
+  minio-data: {}

@@ -13,20 +13,27 @@
   },
   "packageManager": "npm@11.19.0",
   "scripts": {
-    "typecheck": "npm run build -w @design-qa/contracts && npm run typecheck --workspaces",
+    "typecheck": "npm run db:generate && npm run build -w @design-qa/contracts && npm run typecheck --workspaces",
     "lint": "npm run lint --workspaces",
     "test:unit": "npm run test:unit --workspaces --if-present",
     "test:integration": "npm run test:integration --workspaces --if-present",
     "test:e2e": "npm run test:e2e --workspaces --if-present",
-    "build": "npm run build -w @design-qa/contracts && npm run build -w @design-qa/api -w @design-qa/capture -w @design-qa/web"
+    "build": "npm run db:generate && npm run build -w @design-qa/contracts && npm run build -w @design-qa/api -w @design-qa/capture -w @design-qa/web",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate deploy"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@playwright/test": "1.64.0",
     "@types/node": "24.19.2",
     "eslint": "10.12.0",
+    "prisma": "7.10.0",
     "typescript": "5.9.3",
     "typescript-eslint": "8.71.2",
     "vitest": "5.0.4"
+  },
+  "overrides": {
+    "mysql2": "3.24.5",
+    "deepmerge-ts": "8.0.2"
   }
 }

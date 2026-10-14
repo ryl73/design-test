@@ -1,8 +1,9 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.js';
-
+import { CONFIG, type AppConfig } from './config/config.js';
 const app = await NestFactory.create(AppModule);
-app.setGlobalPrefix('api');
+const config=app.get<AppConfig>(CONFIG);
+app.setGlobalPrefix('api/v1');
 app.enableShutdownHooks();
-await app.listen(Number(process.env.PORT ?? 3000), process.env.HOST ?? '127.0.0.1');
+await app.listen(config.port,config.host);
