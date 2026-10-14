@@ -6,6 +6,6 @@ for(const [path,expected] of [['live',200],['ready',degraded?503:200]]){
  const response=await fetch(`${origin}/api/v1/health/${path}`,{signal:AbortSignal.timeout(5000)});
  assert.equal(response.status,expected);
  const body=await response.json();
- if(path==='ready') assert.deepEqual(body.checks,{database:!degraded,storage:true});
+ if(path==='ready') assert.deepEqual(body.checks ?? body.error?.details?.checks,{database:!degraded,storage:true});
  console.log(`${path}: ${response.status}`);
 }

@@ -91,13 +91,15 @@
 
 **Зависимости:** 03. **Файлы:** `packages/contracts/src/`, `apps/api/src/{participants,projects,pages,variants}/`, `tests/integration/structure.spec.ts`.
 
-- [ ] Реализовать participant cookie, Origin check и error envelope по TDD §4; identity не трактовать как подтверждённый аккаунт.
-- [ ] Реализовать создание/чтение/PATCH проектов, страниц и вариантов; cursor pagination, числовые/строковые лимиты.
-- [ ] Обновлять version условно, соблюдать блокировки Project→Page→Variant; запретить записи в архивированном дереве.
-- [ ] Проверить два конкурентных PATCH version=1: один обновляет данные, другой получает 409; разархивирование родителя не снимает архив ребёнка.
-- [ ] Проверить DTO с width=319/2561, пустым именем, неизвестным полем; сервер возвращает ошибку, не сохраняет запись.
+- [x] Реализовать participant cookie, Origin check и error envelope по TDD §4; identity не трактовать как подтверждённый аккаунт.
+- [x] Реализовать создание/чтение/PATCH проектов, страниц и вариантов; cursor pagination, числовые/строковые лимиты.
+- [x] Обновлять version условно, соблюдать блокировки Project→Page→Variant; запретить записи в архивированном дереве.
+- [x] Проверить два конкурентных PATCH version=1: один обновляет данные, другой получает 409; разархивирование родителя не снимает архив ребёнка.
+- [x] Проверить DTO с width=319/2561, пустым именем, неизвестным полем; сервер возвращает ошибку, не сохраняет запись.
 
 **Готово:** FR-01, backend часть AC-01/AC-16. Создание проверки ещё не доступно.
+
+Проверено 14 октября 2026: 18 API unit tests, 82 real integration tests; typecheck/lint/build всех workspace и explicit integration lint проходят. Интерфейсы: browser-safe DTO + effectiveArchived + cursor. Подробное RED/GREEN evidence и UI guide: `.superpowers/sdd/DEVELOPMENT_PLAN/task-4-report.md`. Minor task03 sourceRevision fixture изолирован на unpublished other-variant job.
 
 ### Задача 05. Собрать UI структуры проекта
 

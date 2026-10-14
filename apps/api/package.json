@@ -10,7 +10,7 @@
     "test:unit": "vitest run --config vitest.config.ts",
     "start": "node dist/main.js",
     "dev": "tsc --watch",
-    "test:integration": "vitest run --config vitest.integration.config.ts"
+    "test:integration": "npm run build && vitest run --config vitest.integration.config.ts"
   },
   "dependencies": {
     "@design-qa/contracts": "0.1.0",
