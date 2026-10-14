@@ -1,8 +1,318 @@
 generator client {
-  provider = "prisma-client"
-  output = "../apps/api/src/generated/prisma"
+  provider     = "prisma-client"
+  output       = "../apps/api/src/generated/prisma"
   moduleFormat = "esm"
 }
+
 datasource db {
   provider = "postgresql"
+}
+
+model Participant {
+  id                     String            @id @default(uuid()) @db.Uuid
+  createdAt              DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt              DateTime          @default(now()) @updatedAt @db.Timestamptz(3)
+  displayName            String            @db.VarChar(120)
+  version                Int               @default(1)
+  Project_author         Project[]         @relation("Project_author")
+  BaselineVersion_author BaselineVersion[] @relation("BaselineVersion_author")
+  CaptureJob_requester   CaptureJob[]      @relation("CaptureJob_requester")
+  Issue_author           Issue[]           @relation("Issue_author")
+  Comment_participant    Comment[]         @relation("Comment_participant")
+  IssueEvent_participant IssueEvent[]      @relation("IssueEvent_participant")
+}
+
+model Project {
+  id           String      @id @default(uuid()) @db.Uuid
+  createdAt    DateTime    @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime    @default(now()) @updatedAt @db.Timestamptz(3)
+  name         String      @db.VarChar(120)
+  description  String      @default("")
+  archivedAt   DateTime?   @db.Timestamptz(3)
+  version      Int         @default(1)
+  authorId     String      @db.Uuid
+  author       Participant @relation("Project_author", fields: [authorId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  Page_project Page[]      @relation("Page_project")
+}
+
+model Page {
+  id           String    @id @default(uuid()) @db.Uuid
+  createdAt    DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime  @default(now()) @updatedAt @db.Timestamptz(3)
+  projectId    String    @db.Uuid
+  name         String    @db.VarChar(120)
+  url          String    @db.VarChar(2048)
+  archivedAt   DateTime? @db.Timestamptz(3)
+  version      Int       @default(1)
+  project      Project   @relation("Page_project", fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  Variant_page Variant[] @relation("Variant_page")
+
+  @@index([projectId])
+}
+
+model Variant {
+  id                      String            @id @default(uuid()) @db.Uuid
+  createdAt               DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt               DateTime          @default(now()) @updatedAt @db.Timestamptz(3)
+  pageId                  String            @db.Uuid
+  name                    String            @db.VarChar(120)
+  viewportWidth           Int
+  viewportHeight          Int
+  urlOverride             String?           @db.VarChar(2048)
+  readySelector           String?           @db.VarChar(300)
+  settleDelayMs           Int               @default(300)
+  authProfileRef          Json?             @db.JsonB
+  authReadySelector       String?           @db.VarChar(300)
+  currentBaselineId       String?           @db.Uuid
+  archivedAt              DateTime?         @db.Timestamptz(3)
+  version                 Int               @default(1)
+  nextBaselineNumber      Int               @default(1)
+  nextJobNumber           Int               @default(1)
+  nextRevisionNumber      Int               @default(1)
+  page                    Page              @relation("Variant_page", fields: [pageId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  currentBaseline         BaselineVersion?  @relation("Variant_currentBaseline", fields: [currentBaselineId, id], references: [id, variantId], onDelete: Restrict, onUpdate: Restrict)
+  BaselineVersion_variant BaselineVersion[] @relation("BaselineVersion_variant")
+  CaptureJob_variant      CaptureJob[]      @relation("CaptureJob_variant")
+  ReviewRevision_variant  ReviewRevision[]  @relation("ReviewRevision_variant")
+  Issue_variant           Issue[]           @relation("Issue_variant")
+
+  @@index([pageId])
+}
+
+model Asset {
+  id                             String            @id @default(uuid()) @db.Uuid
+  createdAt                      DateTime          @default(now()) @db.Timestamptz(3)
+  kind                           AssetKind
+  objectKey                      String            @unique
+  previewKey                     String?           @unique
+  sha256                         String            @db.Char(64)
+  width                          Int
+  height                         Int
+  bytes                          BigInt
+  mime                           String            @default("image/png")
+  BaselineVersion_asset          BaselineVersion[] @relation("BaselineVersion_asset")
+  ReviewRevision_screenshotAsset ReviewRevision[]  @relation("ReviewRevision_screenshotAsset")
+}
+
+model BaselineVersion {
+  id                      String           @id @default(uuid()) @db.Uuid
+  createdAt               DateTime         @default(now()) @db.Timestamptz(3)
+  variantId               String           @db.Uuid
+  number                  Int
+  assetId                 String           @db.Uuid
+  source                  BaselineSource   @default(UPLOAD)
+  sourceMetadata          Json             @db.JsonB
+  authorId                String           @db.Uuid
+  authorNameSnapshot      String           @db.VarChar(120)
+  Variant_currentBaseline Variant[]        @relation("Variant_currentBaseline")
+  variant                 Variant          @relation("BaselineVersion_variant", fields: [variantId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  asset                   Asset            @relation("BaselineVersion_asset", fields: [assetId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  author                  Participant      @relation("BaselineVersion_author", fields: [authorId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  ReviewRevision_baseline ReviewRevision[] @relation("ReviewRevision_baseline")
+
+  @@unique([variantId, number])
+  @@unique([id, variantId])
+}
+
+model CaptureJob {
+  id                        String          @id @default(uuid()) @db.Uuid
+  createdAt                 DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt                 DateTime        @default(now()) @updatedAt @db.Timestamptz(3)
+  variantId                 String          @db.Uuid
+  number                    Int
+  state                     CaptureJobState @default(QUEUED)
+  inputSnapshot             Json            @db.JsonB
+  sourceRevisionId          String?         @db.Uuid
+  carriedIssuesSnapshot     Json            @default("[]") @db.JsonB
+  requesterId               String          @db.Uuid
+  requesterNameSnapshot     String          @db.VarChar(120)
+  idempotencyKey            String          @db.Uuid
+  requestHash               String
+  attemptToken              String?         @db.Uuid
+  leaseUntil                DateTime?       @db.Timestamptz(3)
+  phase                     String?
+  revisionId                String?         @unique @db.Uuid
+  errorCode                 String?
+  safeErrorMessage          String?
+  warnings                  Json            @default("[]") @db.JsonB
+  startedAt                 DateTime?       @db.Timestamptz(3)
+  finishedAt                DateTime?       @db.Timestamptz(3)
+  version                   Int             @default(1)
+  variant                   Variant         @relation("CaptureJob_variant", fields: [variantId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  requester                 Participant     @relation("CaptureJob_requester", fields: [requesterId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  sourceRevision            ReviewRevision? @relation("CaptureJob_sourceRevision", fields: [sourceRevisionId, variantId], references: [id, variantId], onDelete: Restrict, onUpdate: Restrict)
+  revision                  ReviewRevision? @relation("CaptureJob_revision", fields: [revisionId, id, variantId], references: [id, captureJobId, variantId], onDelete: Restrict, onUpdate: Restrict)
+  ReviewRevision_captureJob ReviewRevision? @relation("ReviewRevision_captureJob")
+
+  @@unique([variantId, number])
+  @@unique([revisionId, id, variantId])
+  @@unique([variantId, idempotencyKey])
+  @@unique([id, variantId])
+  @@index([state, createdAt])
+}
+
+model ReviewRevision {
+  id                        String          @id @default(uuid()) @db.Uuid
+  createdAt                 DateTime        @default(now()) @db.Timestamptz(3)
+  variantId                 String          @db.Uuid
+  number                    Int
+  baselineId                String          @db.Uuid
+  screenshotAssetId         String          @db.Uuid
+  captureJobId              String          @unique @db.Uuid
+  captureSnapshot           Json            @db.JsonB
+  warnings                  Json            @default("[]") @db.JsonB
+  finalUrl                  String          @db.VarChar(2048)
+  browserVersion            String
+  captureEngineVersion      String
+  capturedAt                DateTime        @db.Timestamptz(3)
+  CaptureJob_sourceRevision CaptureJob[]    @relation("CaptureJob_sourceRevision")
+  CaptureJob_revision       CaptureJob?     @relation("CaptureJob_revision")
+  variant                   Variant         @relation("ReviewRevision_variant", fields: [variantId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  baseline                  BaselineVersion @relation("ReviewRevision_baseline", fields: [baselineId, variantId], references: [id, variantId], onDelete: Restrict, onUpdate: Restrict)
+  screenshotAsset           Asset           @relation("ReviewRevision_screenshotAsset", fields: [screenshotAssetId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  captureJob                CaptureJob      @relation("ReviewRevision_captureJob", fields: [captureJobId, variantId], references: [id, variantId], onDelete: Restrict, onUpdate: Restrict)
+  Issue_originRevision      Issue[]         @relation("Issue_originRevision")
+  IssueReview_revision      IssueReview[]   @relation("IssueReview_revision")
+
+  @@unique([variantId, number])
+  @@unique([id, variantId])
+  @@unique([captureJobId, variantId])
+  @@unique([id, captureJobId, variantId])
+}
+
+model Issue {
+  id                 String         @id @default(uuid()) @db.Uuid
+  createdAt          DateTime       @default(now()) @db.Timestamptz(3)
+  variantId          String         @db.Uuid
+  originRevisionId   String         @db.Uuid
+  originalX          Float          @db.DoublePrecision
+  originalY          Float          @db.DoublePrecision
+  originalWidth      Float          @db.DoublePrecision
+  originalHeight     Float          @db.DoublePrecision
+  authorId           String         @db.Uuid
+  authorNameSnapshot String         @db.VarChar(120)
+  variant            Variant        @relation("Issue_variant", fields: [variantId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  originRevision     ReviewRevision @relation("Issue_originRevision", fields: [originRevisionId, variantId], references: [id, variantId], onDelete: Restrict, onUpdate: Restrict)
+  author             Participant    @relation("Issue_author", fields: [authorId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  IssueReview_issue  IssueReview[]  @relation("IssueReview_issue")
+
+  @@unique([id, variantId])
+}
+
+model IssueReview {
+  id                            String         @id @default(uuid()) @db.Uuid
+  createdAt                     DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt                     DateTime       @default(now()) @updatedAt @db.Timestamptz(3)
+  variantId                     String         @db.Uuid
+  issueId                       String         @db.Uuid
+  revisionId                    String         @db.Uuid
+  state                         IssueState     @default(OPEN)
+  placement                     IssuePlacement @default(CONFIRMED)
+  x                             Float?         @db.DoublePrecision
+  y                             Float?         @db.DoublePrecision
+  width                         Float?         @db.DoublePrecision
+  height                        Float?         @db.DoublePrecision
+  sourceIssueReviewId           String?        @db.Uuid
+  version                       Int            @default(1)
+  issue                         Issue          @relation("IssueReview_issue", fields: [issueId, variantId], references: [id, variantId], onDelete: Restrict, onUpdate: Restrict)
+  revision                      ReviewRevision @relation("IssueReview_revision", fields: [revisionId, variantId], references: [id, variantId], onDelete: Restrict, onUpdate: Restrict)
+  sourceIssueReview             IssueReview?   @relation("IssueReview_sourceIssueReview", fields: [sourceIssueReviewId, issueId, variantId], references: [id, issueId, variantId], onDelete: Restrict, onUpdate: Restrict)
+  IssueReview_sourceIssueReview IssueReview[]  @relation("IssueReview_sourceIssueReview")
+  Comment_issueReview           Comment[]      @relation("Comment_issueReview")
+  IssueEvent_issueReview        IssueEvent[]   @relation("IssueEvent_issueReview")
+
+  @@unique([issueId, revisionId])
+  @@unique([id, issueId, variantId])
+  @@index([revisionId, state])
+}
+
+model Comment {
+  id                 String       @id @default(uuid()) @db.Uuid
+  createdAt          DateTime     @default(now()) @db.Timestamptz(3)
+  issueId            String       @db.Uuid
+  revisionId         String       @db.Uuid
+  participantId      String       @db.Uuid
+  authorNameSnapshot String       @db.VarChar(120)
+  body               String       @db.VarChar(5000)
+  issueReview        IssueReview  @relation("Comment_issueReview", fields: [issueId, revisionId], references: [issueId, revisionId], onDelete: Restrict, onUpdate: Restrict)
+  participant        Participant  @relation("Comment_participant", fields: [participantId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  IssueEvent_comment IssueEvent[] @relation("IssueEvent_comment")
+
+  @@unique([id, issueId, revisionId])
+  @@index([issueId, createdAt, id])
+}
+
+model IssueEvent {
+  id                 String         @id @default(uuid()) @db.Uuid
+  createdAt          DateTime       @default(now()) @db.Timestamptz(3)
+  issueId            String         @db.Uuid
+  revisionId         String         @db.Uuid
+  type               IssueEventType
+  fromState          IssueState?
+  toState            IssueState?
+  previousRect       Json?          @db.JsonB
+  newRect            Json?          @db.JsonB
+  participantId      String         @db.Uuid
+  authorNameSnapshot String         @db.VarChar(120)
+  commentId          String?        @db.Uuid
+  issueReview        IssueReview    @relation("IssueEvent_issueReview", fields: [issueId, revisionId], references: [issueId, revisionId], onDelete: Restrict, onUpdate: Restrict)
+  participant        Participant    @relation("IssueEvent_participant", fields: [participantId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  comment            Comment?       @relation("IssueEvent_comment", fields: [commentId, issueId, revisionId], references: [id, issueId, revisionId], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([issueId, createdAt, id])
+}
+
+model StorageReservation {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+  bytes     BigInt
+  expiresAt DateTime @db.Timestamptz(3)
+  version   Int      @default(1)
+
+  @@index([expiresAt])
+}
+
+model WorkerHeartbeat {
+  id           String   @id
+  createdAt    DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+  lastSeenAt   DateTime @db.Timestamptz(3)
+  captureReady Boolean  @default(false)
+  version      Int      @default(1)
+}
+
+enum AssetKind {
+  BASELINE
+  SCREENSHOT
+}
+
+enum BaselineSource {
+  UPLOAD
+}
+
+enum CaptureJobState {
+  QUEUED
+  RUNNING
+  SUCCEEDED
+  FAILED
+  CANCELED
+}
+
+enum IssueState {
+  OPEN
+  READY_FOR_REVIEW
+  RESOLVED
+}
+
+enum IssuePlacement {
+  CONFIRMED
+  NEEDS_REANCHOR
+}
+
+enum IssueEventType {
+  CREATED
+  CARRIED
+  STATUS_CHANGED
+  REANCHORED
 }

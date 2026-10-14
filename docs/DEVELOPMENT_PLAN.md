@@ -80,10 +80,10 @@
 
 **Зависимости:** 02. **Файлы:** `prisma/schema.prisma`, `prisma/migrations/`, `tests/integration/schema.spec.ts`.
 
-- [ ] Описать все таблицы TDD §3, включая Asset, CaptureJob, IssueReview, reservations и heartbeat.
-- [ ] Добавить SQL CHECK/FK/unique constraints, индексы и immutable triggers из TDD. Изменяемые поля имеют version.
-- [ ] Проверить миграции на пустой базе и повторный deploy без изменений.
-- [ ] Добавить DB-проверки: чужой baseline/source variant запрещён; два active job одного варианта запрещены; UPDATE/DELETE исторических записей запрещён.
+- [x] Описать все таблицы TDD §3, включая Asset, CaptureJob, IssueReview, reservations и heartbeat.
+- [x] Добавить SQL CHECK/FK/unique constraints, индексы и immutable triggers из TDD. Изменяемые поля имеют version.
+- [x] Проверить миграции на пустой базе и повторный deploy без изменений.
+- [x] Добавить DB-проверки: чужой baseline/source variant запрещён; два active job одного варианта запрещены; UPDATE/DELETE исторических записей запрещён.
 
 **Готово:** ограничения действуют в PostgreSQL независимо от DTO/API. Полные бизнес-проверки таблиц добавляются в соответствующих задачах ниже.
 
