@@ -49,11 +49,13 @@ export function RecordForm({
   parentId,
   record,
   onClose,
+  onCreated,
 }: {
   kind: Kind;
   parentId?: string | undefined;
   record?: RecordDto | undefined;
   onClose: () => void;
+  onCreated?: (record: RecordDto) => void;
 }) {
   const [values, setValues] = useState(() => draft(record));
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -84,9 +86,10 @@ export function RecordForm({
       if (Object.keys(changed).length === 0) return baseline!;
       return api.patch(kind, record.id, { ...changed, version: version! });
     },
-    onSuccess: async () => {
+    onSuccess: async (saved) => {
       await qc.invalidateQueries({ queryKey: ["structure"] });
       onClose();
+      if (!record) onCreated?.(saved);
     },
     onError: async (error) => {
       if (error instanceof ApiError && error.status === 409) {

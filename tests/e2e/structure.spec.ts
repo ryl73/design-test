@@ -14,7 +14,10 @@ test("participant creates persisted project, page and three viewport variants", 
   const name = "Проверка " + Date.now();
   await page.getByLabel("Название", { exact: true }).fill(name);
   await page.getByRole("button", { name: "Сохранить", exact: true }).click();
-  await page.getByRole("link", { name, exact: true }).click();
+  await expect(page).toHaveURL(/\/projects\/[^/]+$/);
+  await expect(
+    page.getByRole("heading", { name, exact: true, level: 1 }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Новая страница" }).click();
   await page.getByLabel("Название", { exact: true }).fill("Главная");
   await page.getByLabel("URL страницы").fill("https://example.com/");

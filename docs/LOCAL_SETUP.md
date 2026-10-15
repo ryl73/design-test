@@ -51,3 +51,11 @@ For frontend development, run the API with APP_ORIGIN matching the Vite origin, 
 Browser E2E uses compiled API port 55309 and web http://localhost:55310, separate from integration port 55304. Install Chromium once with `npx playwright install chromium`; browser sandbox stays enabled. It requires the same isolated test environment listed above (NODE_ENV=test, design_qa_test, design-qa-test and local service keys). Run `npm run test:e2e` with these variables; Playwright starts/stops both servers and supplies its exact APP_ORIGIN and a safe test profile metadata fixture. Do not start concurrent E2E runs against these ports. Root `test:unit` dispatches actual suites only; future empty workspace configurations remain without placeholder test scripts.
 
 Stage A has no capture, baseline or revision viewer controls. Profiles shown in optional variant settings are safe metadata only.
+
+E2E explicitly forces the API's NODE_ENV=test after inherited variables and rejects any database/bucket other than `design_qa_test` / `design-qa-test` while loading its configuration, before starting subprocesses. Loading `.env.example` alone is therefore deliberately insufficient. Use explicit test-resource overrides, for example:
+
+```
+NODE_ENV=test DATABASE_URL=postgresql://design_qa:local-database-password@127.0.0.1:55432/design_qa_test MINIO_ENDPOINT=http://127.0.0.1:59000 MINIO_BUCKET=design-qa-test MINIO_ACCESS_KEY=local-minio-access MINIO_SECRET_KEY=local-minio-secret-password SESSION_SIGNING_KEY=local-only-signing-key-32-characters CAPTURE_ALLOWED_ORIGINS=https://example.com npm run test:e2e
+```
+
+A new project opens immediately after creation, including when older projects occupy the first page of the list. E2E keeps existing test fixtures and can be repeated without resetting the database.

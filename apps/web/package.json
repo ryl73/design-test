@@ -9,7 +9,8 @@
     "build": "tsc --noEmit && vite build",
     "dev": "vite",
     "preview": "vite preview",
-    "test:e2e": "playwright test --config playwright.config.ts"
+    "test:e2e": "playwright test --config playwright.config.ts",
+    "test:unit": "vitest run --config vitest.config.ts"
   },
   "dependencies": {
     "@design-qa/contracts": "0.1.0",

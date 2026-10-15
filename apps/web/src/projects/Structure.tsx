@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link as RouterLink, useParams } from "react-router";
+import { Link as RouterLink, useParams, useNavigate } from "react-router";
 import {
   useInfiniteQuery,
   useMutation,
@@ -146,6 +146,7 @@ function List({
   ancestorArchived?: boolean;
   participant: boolean;
 }) {
+  const navigate = useNavigate();
   const [archived, setArchived] = useState("all");
   const [form, setForm] = useState<{ record?: RecordDto } | null>(null);
   const query = useInfiniteQuery({
@@ -265,6 +266,9 @@ function List({
           parentId={parentId}
           record={form.record}
           onClose={() => setForm(null)}
+          onCreated={(created) => {
+            if (kind === "project") navigate(`/projects/${created.id}`);
+          }}
         />
       )}
     </>
