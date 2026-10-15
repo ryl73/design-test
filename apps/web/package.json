@@ -7,20 +7,24 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings 0",
     "build": "tsc --noEmit && vite build",
-    "test:unit": "vitest run --config vitest.config.ts",
     "dev": "vite",
     "preview": "vite preview",
     "test:e2e": "playwright test --config playwright.config.ts"
   },
   "dependencies": {
     "@design-qa/contracts": "0.1.0",
+    "@emotion/react": "11.14.0",
+    "@emotion/styled": "11.14.1",
+    "@mui/material": "9.5.0",
+    "@tanstack/react-query": "5.104.2",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "react-router": "7.18.4"
   },
   "devDependencies": {
-    "vite": "8.3.4",
-    "@vitejs/plugin-react": "6.1.2",
     "@types/react": "19.3.0",
-    "@types/react-dom": "19.3.0"
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "vite": "8.3.4"
   }
 }

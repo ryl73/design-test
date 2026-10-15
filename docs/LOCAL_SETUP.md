@@ -35,3 +35,19 @@ Set `CAPTURE_ALLOWED_ORIGINS` to a comma-separated list of exact origins, includ
 `CAPTURE_PROFILES_METADATA` defaults to `[]`. Each optional entry has only `{id,version,label,origin}`; unknown fields and secrets are rejected. Origins must be on the allowlist. The API returns only these safe fields from `GET /api/v1/capture-profiles`; a variant references `{profileId,version}` and must use the same effective URL origin. This metadata does not enable capture or load profile credentials.
 
 Integration tests compile the API immediately before starting a separate loopback HTTP process on port 55304. They create persistent fixtures only in `design_qa_test` and never reset development records.
+
+## Structure workspace UI (stage A)
+
+The local Compose app at http://localhost:58080 now provides participant naming and Project → Page → Variant management. Anonymous visitors can browse; choose “Указать имя” before editing. The name in the header opens rename. All server data is persisted through the API; no browser-local demo data is installed. Archived descendants remain viewable. Restore the ancestor first before changing its descendants; restoring a parent preserves each child's own archive flag. Edit conflicts keep the draft and offer explicit loading of the latest record.
+
+To rebuild the dedicated local app while retaining volumes and records:
+
+```
+docker compose --env-file .env.example -f infra/compose.yml -f infra/compose.local.yml -p design-qa-stage-a up --build -d --wait api web
+```
+
+For frontend development, run the API with APP_ORIGIN matching the Vite origin, then `API_PROXY_TARGET=http://127.0.0.1:3000 npm run dev -w @design-qa/web -- --port 5173 --strictPort`. Open http://127.0.0.1:5173 and set APP_ORIGIN to exactly that origin. The Vite proxy keeps API requests and participant cookies same-origin.
+
+Browser E2E uses compiled API port 55309 and web http://localhost:55310, separate from integration port 55304. Install Chromium once with `npx playwright install chromium`; browser sandbox stays enabled. It requires the same isolated test environment listed above (NODE_ENV=test, design_qa_test, design-qa-test and local service keys). Run `npm run test:e2e` with these variables; Playwright starts/stops both servers and supplies its exact APP_ORIGIN and a safe test profile metadata fixture. Do not start concurrent E2E runs against these ports. Root `test:unit` dispatches actual suites only; future empty workspace configurations remain without placeholder test scripts.
+
+Stage A has no capture, baseline or revision viewer controls. Profiles shown in optional variant settings are safe metadata only.
