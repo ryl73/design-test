@@ -21,6 +21,6 @@ export function useComparison() {
   } catch(error) {if(alive.current&&request===generation.current[slot])setErrors(v=>({...v,[slot]:error instanceof Error?error.message:'Не удалось прочитать файл.'}));}
   finally {if(alive.current&&request===generation.current[slot])setLoading(v=>({...v,[slot]:false}));}
  }
- function clear(slot?:Slot) {if(notesRef.current.length&&!window.confirm('Очистить изображения и удалить замечания?'))return; if(slot)generation.current[slot]++;else{generation.current.site++;generation.current.figma++;}setLoading({});setErrors({});publish(slot?{...current.current,[slot]:undefined}:{});}
+ function clear(slot?:Slot) {if(notesRef.current.length&&!window.confirm('Очистить изображения и удалить замечания?'))return; if(slot){generation.current[slot]++;setLoading(value=>({...value,[slot]:false}));setErrors(value=>({...value,[slot]:undefined}));const next={...current.current};delete next[slot];publish(next);}else{generation.current.site++;generation.current.figma++;setLoading({});setErrors({});publish({});}}
  return {images,notes,setNotes,errors,loading,choose,clear,revision};
 }
