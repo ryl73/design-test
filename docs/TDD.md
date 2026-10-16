@@ -50,7 +50,7 @@ README.md
 type Size = { width: number; height: number };
 type Point = { x: number; y: number };
 type Rect = Point & Size;
-type Camera = { center: Point; zoom: number }; // zoom .1–4
+type Camera = { center: Point; zoom: number }; // zoom .01–4
 
 type ImageHeader = Size & { format: 'png'|'jpeg'; mime: 'image/png'|'image/jpeg' };
 type ComparisonImage = ImageHeader & { id: string; name: string; url: string; bytes: number };

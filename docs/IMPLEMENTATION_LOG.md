@@ -1,5 +1,9 @@
 # Implementation log
 
+## История версии 1 — серверная архитектура (заменена PRD/TDD 2.0)
+
+Записи ниже до раздела «Версия 2» относятся к историческим требованиям. Их AC и результаты не подтверждают приёмку локального инструмента. Код сохранён в Git; реальные volumes и данные не удаляются.
+
 ## Task 01 — workspace/tooling bootstrap (2026-10-13)
 
 Scope: npm workspaces, shared strict TypeScript, browser-safe contracts, React/Vite shell, Nest HTTP bootstrap and disabled capture entrypoint. Tasks 02 onward remain unimplemented.
@@ -69,3 +73,12 @@ AC-01 passes. The structural portion of AC-16 passes: archive denies structure w
 Recorded decisions: save-time URL format/exact-origin checks are implemented now; full DNS/egress policy is task09 before any capture. Root unit scripts include only genuine suites; when adding a suite to a future workspace its test command must be added. These choices avoid claiming unimplemented network controls or artificial test coverage.
 
 Known limitations: four moderate advisories remain in the existing MinIO SDK dependency chain; reassess before adding notification/untrusted-storage use. The production UI bundle exceeds Vite's500kB warning threshold (about575kB/179kB gzip), tracked for later splitting; the threshold was not suppressed. MinIO builds pinned official source because registry images were unavailable. Capture, baseline upload and review comparison are subsequent stages. No merge, push or public deployment performed.
+
+
+## Версия 2 — Task 1: статический frontend (2026-10-16)
+
+Серверные tracked файлы, Prisma/contracts, старый API UI и зависимые тесты удалены. Единственный workspace — apps/web, сохранены точные React/MUI/Vite/Node/npm версии. Статические Vite/Playwright/nginx больше не используют API/env/DB. Сравнение пока представлено временным экраном до Task 3, LC-01–LC-12 остаются непроверенными.
+
+Проверено на Node24.21.0/npm11.19.0 без DATABASE_URL/MinIO: clean npm ci (213 packages, audit 0), typecheck/lint/build — exit0; bundle и lockfile без /api/, Prisma, TanStack/router. Production preview smoke — HTTP200 на127.0.0.1:55310, процесс остановлен. Unit и оба Playwright --list честно завершаются exit1: suites ещё пусты. Chromium sandbox=true, integration @integration и E2E grep-invert. Первичная sandbox попытка слушать порт получила EPERM; разрешённый smoke выполнен отдельно.
+
+Существующие ignored env/данные и Docker контейнеры/volumes не изменялись. Lockfile пересоздан npm; npm ci использовал существующий cache после остановки зависшей sandbox попытки с пустым cache. Источник миграции: docs2 commit5f5263b; точная ссылка на реализацию добавлена следующей записью evidence.

@@ -14,7 +14,7 @@
 
 - Файлы PNG/JPEG≤15MiB, width1–4096,height1–10000,pixels≤25_600_000; APNG/SVG/GIF запрещены.
 - Нет uploads/API/backend/БД/Figma API, внешних шрифтов, аналитики и image persistence.
-- Разные размеры допустимы без resample; camera.zoom .1–4; rect в site pixels.
+- Разные размеры допустимы без resample; camera.zoom .01–4; rect в site pixels.
 - Notes≤500, body trim1–5000, states OPEN/RESOLVED; JPEG EXIF consistent decoded/rendered size.
 - Замена с notes требует подтверждения; невалидный новый файл сохраняет прежнее состояние.
 - Сессия живёт только в памяти, export JSON без images/blobURL. UI объясняет потерю при reload.
@@ -27,14 +27,14 @@
 
 **Interfaces:** consumes existing React/MUI toolchain/theme. Produces root npm scripts dev/start/preview/build/typecheck/lint/test:unit/test:integration/test:e2e, apps/web/src/pages/compare/index.ts page entry. Placeholder page только как краткая интеграционная граница до Task3, не результат приёмки.
 
-- [ ] Сохранить подтверждённые PRD/TDD/plan2; проверить git status, работать в уже существующей isolated worktree.
-- [ ] Удалить только tracked obsolete server code и старые зависимые тесты; не трогать Docker volumes/пользовательские файлы и sources/.
-- [ ] Root workspaces=['apps/web']; scripts dispatch real web commands; TypeScript/lint/build не вызывают Prisma/DB. Удалить obsolete dependencies и npm ci по обновлённому lockfile.
-- [ ] Единственный App — theme+compare page; без queryclient/router/participants. Удалить API proxy и backend env/test guards.
-- [ ] Playwright запускает только production static webserver, Chromium sandbox=true. Integration tag @integration, E2E grepInvert; actual suites добавятся Task2/3, не passWithNoTests.
-- [ ] Web Dockerfile собирает только web, nginx раздаёт static. Compose только web на127.0.0.1:58080 и HTTP healthcheck; нет DB ports/secrets/dependencies.
-- [ ] README/LOCAL_SETUP описывают npm ci/dev/build/preview без env/Docker; Docker необязателен. Отдельно пометить исторический IMPLEMENTATION_LOG.
-- [ ] `npm ci`, `npm run typecheck`, `npm run lint`, `npm run build` безDATABASE_URL/MinIO/docker проходят; проверить bundle не содержит старых /api routes. Commit.
+- [x] Сохранить подтверждённые PRD/TDD/plan2; проверить git status, работать в уже существующей isolated worktree.
+- [x] Удалить только tracked obsolete server code и старые зависимые тесты; не трогать Docker volumes/пользовательские файлы и sources/.
+- [x] Root workspaces=['apps/web']; scripts dispatch real web commands; TypeScript/lint/build не вызывают Prisma/DB. Удалить obsolete dependencies и npm ci по обновлённому lockfile.
+- [x] Единственный App — theme+compare page; без queryclient/router/participants. Удалить API proxy и backend env/test guards.
+- [x] Playwright запускает только production static webserver, Chromium sandbox=true. Integration tag @integration, E2E grepInvert; actual suites добавятся Task2/3, не passWithNoTests.
+- [x] Web Dockerfile собирает только web, nginx раздаёт static. Compose только web на127.0.0.1:58080 и HTTP healthcheck; нет DB ports/secrets/dependencies.
+- [x] README/LOCAL_SETUP описывают npm ci/dev/build/preview без env/Docker; Docker необязателен. Отдельно пометить исторический IMPLEMENTATION_LOG.
+- [x] `npm ci`, `npm run typecheck`, `npm run lint`, `npm run build` безDATABASE_URL/MinIO/docker проходят; проверить bundle не содержит старых /api routes. Commit.
 
 ## Task 2. Реализовать браузерные image/geometry/notes модели
 
@@ -47,7 +47,7 @@
 - [ ] Реализовать bounded header readers, validate-before-decode, actual createImageBitmap+close, create/revoke URL; typed helpful errors. Проверить orientation и decode failures реальным browser integration, без серверов.
 - [ ] Реализовать math exports по формулам TDD§5, без DOM dependencies и избыточных абстракций.
 - [ ] RED notes/report: whitespace body error,5001 error, out-of-bounds rect error, no image URL/binary fields in JSON. Реализовать validation и export shape.
-- [ ] Подготовить настоящие synthetic PNG/JPEG fixtures. Browser @integration загружает их реальным декодером, проверяет валидные/повреждённые/unsupported/oversize inputs.
+- [ ] Подготовить настоящие synthetic PNG/JPEG fixtures. Реальный browser @integration запускается в Task3 через file pickers готового UI: valid/corrupt/unsupported/oversize inputs. В Task2 не добавлять тестовые API/hooks в production page ради доступа к модели.
 - [ ] Focused tests +typecheck/lint/build проходят. Записать RED/GREEN, commit.
 
 ## Task 3. Собрать comparison workspace и локальные замечания
@@ -59,7 +59,7 @@
 - [ ] Написать E2E сначала: реальные двафайла → три режима → rect → note → JSON download; увидеть RED отсутствующего поведения.
 - [ ] Два file pickers с именами/размерами/error/loading; одна pending generation на слот, release всех неиспользуемых URL, состояние StrictMode безопасно.
 - [ ] Overlay opacity0/50/100, draggable+keyboard divider0/50/100, side-by-side Figma/site, hatch outside image. Не растягивать исходники.
-- [ ] Общие camera/zoom10–400, fit/1:1/+/-/zoomanchor, pan/Space/Escape/pointercancel. Смена режима сохраняет center/zoom. Мобильная375px компоновка без overflow.
+- [ ] Общие camera/zoom1–400, fit/1:1/+/-/zoomanchor, pan/Space/Escape/pointercancel. Смена режима сохраняет center/zoom. Мобильная375px компоновка без overflow.
 - [ ] Draw только site plane, clamp и zoom transforms; draft form, plain-text body, select/highlight/center, edit text, OPEN/RESOLVED/delete, limit500.
 - [ ] Candidate replacement сначала validate/decode, затем confirm при notes; cancel/invalid сохраняет пару/notes; confirm очищает. Clear/reset такие же.
 - [ ] Экспорт JSON и сообщение о памяти вкладки; beforeunload дополнительный. Не обещать восстановление/export images.
