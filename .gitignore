@@ -16,3 +16,5 @@ coverage/
 playwright-report/
 test-results/
 
+# Preserve ignored legacy generated files without tracking them.
+apps/api/src/generated/
