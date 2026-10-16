@@ -44,13 +44,13 @@
 
 - [x] RED unit: `screenToImage(imageToScreen({x:120,y:230},camera,viewport),camera,viewport)` при .5/1/2 и pan возвращает исходную точку≤0.5px; zoomAt сохраняет anchor; reverse/outside rect clamp; zero drag=null.
 - [x] RED file header tests PNG/JPEG, APNG/acTL, corrupt/unknown signature,15MiB+1, width4097,height10001,pixels25_600_001. Конечные числа проверяются.
-- [ ] Реализовать bounded header readers, validate-before-decode, actual createImageBitmap+close, create/revoke URL; typed helpful errors. Проверить orientation и decode failures реальным browser integration, без серверов.
+- [x] Реализовать bounded header readers, validate-before-decode, actual createImageBitmap+close, create/revoke URL; typed helpful errors. Проверить orientation и decode failures реальным browser integration, без серверов.
 - [x] Реализовать math exports по формулам TDD§5, без DOM dependencies и избыточных абстракций.
 - [x] RED notes/report: whitespace body error,5001 error, out-of-bounds rect error, no image URL/binary fields in JSON. Реализовать validation и export shape.
 - [x] Подготовить настоящие synthetic PNG/JPEG fixtures. Реальный browser @integration запускается в Task3 через file pickers готового UI: valid/corrupt/unsupported/oversize inputs. В Task2 не добавлять тестовые API/hooks в production page ради доступа к модели.
 - [x] Focused tests +typecheck/lint/build проходят. Записать RED/GREEN, commit.
 
-Task2 evidence: 22 unit tests/typecheck/lint/build PASS (2026-10-16). Header/decode/URL implementation ready; real browser orientation/decode/lifecycle verification remains Task3, so the combined browser checkbox remains unchecked. Fixtures are committed; oversized input is generated in browser tests. RED began with missing module exports; no browser decode acceptance is claimed.
+Task2 evidence: 22 unit tests/typecheck/lint/build PASS (2026-10-16). Task3 browser integration added real orientation/decode and URL lifecycle checks (2/2 PASS), completing the remaining browser checkbox. Fixtures are committed; oversized input is generated in browser tests. RED began with missing module exports.
 
 ## Task 3. Собрать comparison workspace и локальные замечания
 
@@ -58,15 +58,17 @@ Task2 evidence: 22 unit tests/typecheck/lint/build PASS (2026-10-16). Header/dec
 
 **Interfaces:** потребляет Task2 exact model exports; site/figma slots, mode/camera/tool, local notes and drafts. Public page через pages/compare/index.ts.
 
-- [ ] Написать E2E сначала: реальные двафайла → три режима → rect → note → JSON download; увидеть RED отсутствующего поведения.
+- [x] Написать E2E сначала: реальные двафайла → три режима → rect → note → JSON download; увидеть RED отсутствующего поведения.
 - [ ] Два file pickers с именами/размерами/error/loading; одна pending generation на слот, release всех неиспользуемых URL, состояние StrictMode безопасно.
-- [ ] Overlay opacity0/50/100, draggable+keyboard divider0/50/100, side-by-side Figma/site, hatch outside image. Не растягивать исходники.
+- [x] Overlay opacity0/50/100, draggable+keyboard divider0/50/100, side-by-side Figma/site, hatch outside image. Не растягивать исходники.
 - [ ] Общие camera/zoom1–400, fit/1:1/+/-/zoomanchor, pan/Space/Escape/pointercancel. Смена режима сохраняет center/zoom. Мобильная375px компоновка без overflow.
 - [ ] Draw только site plane, clamp и zoom transforms; draft form, plain-text body, select/highlight/center, edit text, OPEN/RESOLVED/delete, limit500.
-- [ ] Candidate replacement сначала validate/decode, затем confirm при notes; cancel/invalid сохраняет пару/notes; confirm очищает. Clear/reset такие же.
-- [ ] Экспорт JSON и сообщение о памяти вкладки; beforeunload дополнительный. Не обещать восстановление/export images.
+- [x] Candidate replacement сначала validate/decode, затем confirm при notes; cancel/invalid сохраняет пару/notes; confirm очищает. Clear/reset такие же.
+- [x] Экспорт JSON и сообщение о памяти вкладки; beforeunload дополнительный. Не обещать восстановление/export images.
 - [ ] Browser tests: different sizes, actual JPEG/PNG, invalidreplace, rapid selection, URL cleanup, 50/100/200% rect coordinates, leftpane draw rejected, note selection/status/delete, textHTMLsafe, cancel/reset, export exactfields, network requests absent afterinitialload, keyboard/mobile.
-- [ ] Визуально проверить populated desktop/mobile screenshots с fixture-парой. Полный unit/integration/E2E/typecheck/lint/build. Заполнить LC evidence, commit.
+- [x] Визуально проверить populated desktop/mobile screenshots с fixture-парой. Полный unit/integration/E2E/typecheck/lint/build. Заполнить LC evidence, commit.
+
+Task3 baseline evidence: RED placeholder scenario, затем unit 22/22, integration 2/2, E2E 5/5, typecheck/lint/build exit0 на `eb35a88`; populated desktop/mobile screenshots и LC-01–LC-12 перечислены в IMPLEMENTATION_LOG и `task-3-report.md`. Независимый review нашёл доработки для нового черновика во время редактирования заметки, глобального Space и индикации загрузки по слотам; соответствующие UI/browser чекбоксы остаются открытыми до исправления и повторной проверки.
 
 ## Task 4. Проверить переход и показать результат
 
