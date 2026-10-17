@@ -1,0 +1,4 @@
+import type { ComparisonImage } from '../model/image-file';
+export function ImagePicker({label,image,error,loading,onFile,onClear}:{label:string;image?:ComparisonImage|undefined;error?:string|undefined;loading?:boolean|undefined;onFile:(file:File)=>void;onClear:()=>void}) {
+ return <section className="picker"><strong>{label}</strong><label className="file-choice"><span>{image?'Заменить файл':'Выбрать файл'}</span><input className="sr-only" aria-label={label} type="file" accept="image/png,image/jpeg" onChange={event=>{const file=event.target.files?.[0];if(file)onFile(file);event.target.value='';}}/></label><div className="file-info">{loading?'Чтение изображения…':image?<><b>{image.name}</b><span>{image.width} × {image.height} px</span></>:'PNG или JPEG · до 15 MiB'}</div>{image&&<button onClick={onClear}>Очистить {label.toLowerCase()}</button>}{error&&<p role="alert">{error}</p>}</section>;
+}
