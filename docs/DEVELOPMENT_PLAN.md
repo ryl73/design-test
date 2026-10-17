@@ -59,25 +59,27 @@ Task2 evidence: 22 unit tests/typecheck/lint/build PASS (2026-10-16). Task3 brow
 **Interfaces:** потребляет Task2 exact model exports; site/figma slots, mode/camera/tool, local notes and drafts. Public page через pages/compare/index.ts.
 
 - [x] Написать E2E сначала: реальные двафайла → три режима → rect → note → JSON download; увидеть RED отсутствующего поведения.
-- [ ] Два file pickers с именами/размерами/error/loading; одна pending generation на слот, release всех неиспользуемых URL, состояние StrictMode безопасно.
+- [x] Два file pickers с именами/размерами/error/loading; одна pending generation на слот, release всех неиспользуемых URL, состояние StrictMode безопасно.
 - [x] Overlay opacity0/50/100, draggable+keyboard divider0/50/100, side-by-side Figma/site, hatch outside image. Не растягивать исходники.
-- [ ] Общие camera/zoom1–400, fit/1:1/+/-/zoomanchor, pan/Space/Escape/pointercancel. Смена режима сохраняет center/zoom. Мобильная375px компоновка без overflow.
-- [ ] Draw только site plane, clamp и zoom transforms; draft form, plain-text body, select/highlight/center, edit text, OPEN/RESOLVED/delete, limit500.
+- [x] Общие camera/zoom1–400, fit/1:1/+/-/zoomanchor, pan/Space/Escape/pointercancel. Смена режима сохраняет center/zoom. Мобильная375px компоновка без overflow.
+- [x] Draw только site plane, clamp и zoom transforms; draft form, plain-text body, select/highlight/center, edit text, OPEN/RESOLVED/delete, limit500.
 - [x] Candidate replacement сначала validate/decode, затем confirm при notes; cancel/invalid сохраняет пару/notes; confirm очищает. Clear/reset такие же.
 - [x] Экспорт JSON и сообщение о памяти вкладки; beforeunload дополнительный. Не обещать восстановление/export images.
-- [ ] Browser tests: different sizes, actual JPEG/PNG, invalidreplace, rapid selection, URL cleanup, 50/100/200% rect coordinates, leftpane draw rejected, note selection/status/delete, textHTMLsafe, cancel/reset, export exactfields, network requests absent afterinitialload, keyboard/mobile.
+- [x] Browser tests: different sizes, actual JPEG/PNG, invalidreplace, rapid selection, URL cleanup, 50/100/200% rect coordinates, leftpane draw rejected, note selection/status/delete, textHTMLsafe, cancel/reset, export exactfields, network requests absent afterinitialload, keyboard/mobile.
 - [x] Визуально проверить populated desktop/mobile screenshots с fixture-парой. Полный unit/integration/E2E/typecheck/lint/build. Заполнить LC evidence, commit.
 
-Task3 baseline evidence: RED placeholder scenario, затем unit 22/22, integration 2/2, E2E 5/5, typecheck/lint/build exit0 на `eb35a88`; populated desktop/mobile screenshots и LC-01–LC-12 перечислены в IMPLEMENTATION_LOG и `task-3-report.md`. Независимый review нашёл доработки для нового черновика во время редактирования заметки, глобального Space и индикации загрузки по слотам; соответствующие UI/browser чекбоксы остаются открытыми до исправления и повторной проверки.
+Task3 evidence: RED placeholder scenario; baseline `eb35a88` прошёл unit 22/22, integration 2/2, E2E 5/5. Независимый scoped review выявил проблемы нового черновика при редактировании заметки, Space на кнопках, индикации загрузки по слотам и очистки URL; исправления вошли в `acce610` и приняты повторным scoped review. Финальные проверки на `acce610`: unit 22/22, integration 4/4, E2E 8/8, typecheck/lint/production build exit0. Populated desktop/mobile screenshots и LC-01–LC-12 перечислены в IMPLEMENTATION_LOG.
 
 ## Task 4. Проверить переход и показать результат
 
 **Files:** docs/IMPLEMENTATION_LOG.md, README/LOCAL_SETUP, current plan; optional static Docker preview.
 
-- [ ] Независимое code/spec review всей новой концепции, исправить реальные findings с regression tests.
-- [ ] Выполнить clean npm ci и все root checks без env/БД/Docker. Tests действительно проверяют локальные файлы и geometry, не skip.
-- [ ] Обновить preview localhost58080 статическим web, старые api/postgres/minio остановить без volume deletion; проверить UI не делает /api calls и работает с браузером offline послеinitialload.
-- [ ] Сверить LC-01–LC-12 с evidence; описать ограничения in-memory/форматы и команды запуска. Сохранить checked progress и commit log.
+- [x] Независимое code/spec review всей новой концепции, исправить реальные findings с regression tests.
+- [x] Выполнить clean npm ci и все root checks без env/БД/Docker. Tests действительно проверяют локальные файлы и geometry, не skip.
+- [x] Обновить preview localhost58080 статическим web, старые api/postgres/minio остановить без volume deletion; проверить UI не делает /api calls и работает с браузером offline послеinitialload.
+- [x] Сверить LC-01–LC-12 с evidence; описать ограничения in-memory/форматы и команды запуска. Сохранить checked progress и commit log.
+
+Task4 evidence: clean npm ci на `eb35a88` добавил 213 пакетов; 2026-10-16 после исправлений parent независимо проверил все root suites на `acce610` (22 unit, 4 integration, 8 E2E, typecheck/lint/production build). Docker web preview `acce610` healthy на 127.0.0.1:58080, HTTP200 и новый asset подтверждены, в том числе повторно 2026-10-17; legacy api/postgres/minio остановлены без удаления контейнеров и volumes. Финальный whole-branch review подтвердил PRD/TDD v2 без новых actionable findings.
 
 ## Пересмотр старого плана
 
