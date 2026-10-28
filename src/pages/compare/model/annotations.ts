@@ -1,6 +1,6 @@
 import type { Rect, Size } from './geometry';
 import type { ComparisonImage } from './image-file';
-export type ComparisonNote = { id: string; rect: Rect; body: string; state: 'OPEN' | 'RESOLVED' };
+export type ComparisonNote = { id: string; rect: Rect; body: string; state: 'OPEN' | 'RESOLVED'; origin?:'AUTO'; evidence?:{site:string;figma:string}; verification?:'CLEARED'|'REMAINING'|'UNCHECKED';creationBounds?:Size };
 export function validateNoteBody(value: string): string {
   const body = value.trim();
   if (!body.length || body.length > 5000) throw new Error('Введите текст замечания от 1 до 5000 символов.');
@@ -12,9 +12,9 @@ export function validateNoteRect(rect: Rect, site: Size): void {
 export function createReport(site: ComparisonImage, figma: ComparisonImage, notes: ComparisonNote[], exportedAt: string) {
   if (!notes.length || notes.length > 500) throw new Error('Для экспорта нужно от 1 до 500 замечаний.');
   const describe = (image: ComparisonImage) => ({ name: image.name.split(/[\\/]/).pop() || 'image', width: image.width, height: image.height });
-  return { schemaVersion: 1, exportedAt, site: describe(site), figma: describe(figma), notes: notes.map(note => {
-    validateNoteRect(note.rect, site);
+  return { schemaVersion: notes.some(note=>note.origin||note.verification||note.creationBounds)?2:1, exportedAt, site: describe(site), figma: describe(figma), notes: notes.map(note => {
+    validateNoteRect(note.rect, note.creationBounds??(note.origin==='AUTO'?{width:Math.max(site.width,figma.width),height:Math.max(site.height,figma.height)}:site));
     if (note.state !== 'OPEN' && note.state !== 'RESOLVED') throw new Error('Неизвестный статус замечания.');
-    return { id: note.id, rect: { x: note.rect.x, y: note.rect.y, width: note.rect.width, height: note.rect.height }, body: validateNoteBody(note.body), state: note.state };
+    return { id: note.id, rect: { x: note.rect.x, y: note.rect.y, width: note.rect.width, height: note.rect.height }, body: validateNoteBody(note.body), state: note.state,...(note.origin?{origin:note.origin}:{}),...(note.verification?{verification:note.verification}:{}),...(note.creationBounds?{creationBounds:{...note.creationBounds}}:{}) };
   }) };
 }

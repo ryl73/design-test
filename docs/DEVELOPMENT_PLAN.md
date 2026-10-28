@@ -21,20 +21,16 @@
 - Старые реальные volumes/данные не удаляются; Git сохраняет удаляемый код.
 - Сначала настоящий RED, затем код, GREEN, review и осмысленный commit. Для docs/config — build/smoke вместо искусственных unit tests.
 
-## Task 1. Перевести рабочую среду на статический frontend
+## Task 1. Организовать самостоятельное фронтенд-приложение
 
-**Files:** root package.json/lock, apps/web/package.json/configs/App/main, eslint, README, docs/LOCAL_SETUP; удалить apps/api, apps/capture, packages/contracts, prisma*, серверные scripts/tests, старые web/api и projects/ компоненты, старую .env.example, server Dockerfiles/overrides. Сохранить infra/Dockerfile.web + web/default.conf + compose.yml как web-only preview.
+**Files:** `package.json`, `package-lock.json`, `tsconfig.json`, конфигурации инструментов, `src/`, `tests/`, `infra/`, README и инструкция запуска.
 
-**Interfaces:** consumes existing React/MUI toolchain/theme. Produces root npm scripts dev/start/preview/build/typecheck/lint/test:unit/test:integration/test:e2e, apps/web/src/pages/compare/index.ts page entry. Placeholder page только как краткая интеграционная граница до Task3, не результат приёмки.
-
-- [x] Сохранить подтверждённые PRD/TDD/plan2; проверить git status, работать в уже существующей isolated worktree.
-- [x] Удалить только tracked obsolete server code и старые зависимые тесты; не трогать Docker volumes/пользовательские файлы и sources/.
-- [x] Root workspaces=['apps/web']; scripts dispatch real web commands; TypeScript/lint/build не вызывают Prisma/DB. Удалить obsolete dependencies и npm ci по обновлённому lockfile.
-- [x] Единственный App — theme+compare page; без queryclient/router/participants. Удалить API proxy и backend env/test guards.
-- [x] Playwright запускает только production static webserver, Chromium sandbox=true. Integration tag @integration, E2E grepInvert; actual suites добавятся Task2/3, не passWithNoTests.
-- [x] Web Dockerfile собирает только web, nginx раздаёт static. Compose только web на127.0.0.1:58080 и HTTP healthcheck; нет DB ports/secrets/dependencies.
-- [x] README/LOCAL_SETUP описывают npm ci/dev/build/preview без env/Docker; Docker необязателен. Отдельно пометить исторический IMPLEMENTATION_LOG.
-- [x] `npm ci`, `npm run typecheck`, `npm run lint`, `npm run build` безDATABASE_URL/MinIO/docker проходят; проверить bundle не содержит старых /api routes. Commit.
+- [x] Все зависимости и команды находятся в корневом `package.json`.
+- [x] Исходники размещены в `src/`, точка входа — `src/main.tsx`; единственная страница — `src/pages/compare/index.ts`.
+- [x] TypeScript использует один `tsconfig.json`.
+- [x] Vitest и Playwright запускаются из корня; тестовые изображения лежат в `tests/fixtures/images/`.
+- [x] Необязательный Docker preview собирает корневое приложение и раздаёт `dist/` через nginx.
+- [x] Сборка и проверки выполняются без серверных компонентов.
 
 ## Task 2. Реализовать браузерные image/geometry/notes модели
 
@@ -52,7 +48,7 @@
 
 Task2 evidence: 22 unit tests/typecheck/lint/build PASS (2026-10-16). Task3 browser integration added real orientation/decode and URL lifecycle checks (2/2 PASS), completing the remaining browser checkbox. Fixtures are committed; oversized input is generated in browser tests. RED began with missing module exports.
 
-## Task 3. Собрать comparison workspace и локальные замечания
+## Task 3. Собрать экран сравнения и локальные замечания
 
 **Files:** pages/compare/ui/{ComparePage,ImagePicker,ComparisonCanvas,CompareToolbar,NotesPanel}.tsx; model/use-comparison.ts; App wiring, theme при необходимости, tests/e2e/local-comparison.spec.ts и browser @integration tests.
 

@@ -3,24 +3,23 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "workspaces": [
-    "apps/web"
-  ],
   "engines": {
     "node": "24.21.0",
     "npm": "11.19.0"
   },
   "packageManager": "npm@11.19.0",
   "scripts": {
-    "dev": "npm run dev -w @design-qa/web --",
-    "start": "npm run start -w @design-qa/web --",
-    "preview": "npm run preview -w @design-qa/web --",
-    "build": "npm run build -w @design-qa/web --",
-    "typecheck": "npm run typecheck -w @design-qa/web --",
-    "lint": "npm run lint -w @design-qa/web --",
-    "test:unit": "npm run test:unit -w @design-qa/web --",
-    "test:integration": "npm run test:integration -w @design-qa/web --",
-    "test:e2e": "npm run test:e2e -w @design-qa/web --"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0",
+    "build": "tsc --noEmit && vite build",
+    "dev": "vite",
+    "preview": "vite preview",
+    "test:e2e": "playwright test --config playwright.config.ts --grep-invert @integration",
+    "test:unit": "vitest run --config vitest.config.ts",
+    "start": "vite",
+    "test:integration": "playwright test --config playwright.config.ts --grep @integration",
+    "test": "vitest run",
+    "test:browser": "playwright test"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
@@ -29,6 +28,18 @@
     "eslint": "10.12.0",
     "typescript": "5.9.3",
     "typescript-eslint": "8.71.2",
-    "vitest": "5.0.4"
+    "vitest": "5.0.4",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "vite": "8.3.4"
+  },
+  "dependencies": {
+    "@emotion/react": "11.14.0",
+    "@emotion/styled": "11.14.1",
+    "@mui/material": "9.5.0",
+    "pixelmatch": "7.1.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
   }
 }
