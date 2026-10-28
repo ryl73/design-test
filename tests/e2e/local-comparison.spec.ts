@@ -11,6 +11,7 @@ test('local pair, modes, note and export', async ({ page }) => {
  await page.getByRole('button',{name:'Наложение',exact:true}).click();
  await page.getByRole('button',{name:'1:1',exact:true}).click();
  await page.getByRole('button',{name:'Область',exact:true}).click();
+ await page.getByTestId('site-pane').scrollIntoViewIfNeeded();
  const box = await page.getByTestId('site-pane').boundingBox();
  if (!box) throw Error('missing pane');
  await page.mouse.move(box.x+box.width/2-100,box.y+box.height/2-70); await page.mouse.down(); await page.mouse.move(box.x+box.width/2-50,box.y+box.height/2-30); await page.mouse.up();
@@ -94,4 +95,29 @@ test('divider pointer drag and camera center survive mode and viewport changes',
  await page.getByRole('button',{name:'Разделитель',exact:true}).click();const slider=page.getByRole('slider',{name:'Граница сравнения'});const pane=(await page.getByTestId('site-pane').boundingBox())!;const handle=(await slider.boundingBox())!;await page.mouse.move(handle.x+handle.width/2,handle.y+handle.height/2);await page.mouse.down();await page.mouse.move(pane.x+pane.width*.75,handle.y+handle.height/2);await page.mouse.up();await expect(slider).toHaveAttribute('aria-valuenow',/7[4-6]/);
  await page.getByRole('button',{name:'Рядом',exact:true}).click();await page.setViewportSize({width:1050,height:900});await expect.poll(worldCenter).toEqual({x:160,y:120});await expect(page.getByLabel('Масштаб, %')).toHaveValue('100');
  await page.getByRole('button',{name:'Перемещение',exact:true}).click();const box=(await page.getByTestId('site-pane').boundingBox())!;await page.mouse.move(box.x+box.width/2,box.y+box.height/2);await page.mouse.down();await page.mouse.move(box.x+box.width/2+25,box.y+box.height/2+15);await page.mouse.up();const panned=await worldCenter();expect(panned.x).toBeCloseTo(135,0);expect(panned.y).toBeCloseTo(105,0);
+});
+
+test('fullscreen icon expands comparison, preserves zoom and exits with Escape',async({page})=>{
+ await page.goto('/');
+ await expect(page.getByRole('button',{name:'На весь экран',exact:true})).toBeDisabled();
+ await pair(page);
+ await page.getByLabel('Масштаб, %').fill('100');
+ const expand=page.getByRole('button',{name:'На весь экран',exact:true});
+ await expect(expand.locator('svg')).toHaveCount(1);
+ await expect(expand).toHaveText('');
+ await expand.click();
+ await expect(page.locator('.comparison-view')).toHaveClass(/is-fullscreen/);
+ await expect(page.getByLabel('Масштаб, %')).toHaveValue('100');
+ await page.getByRole('button',{name:'Рядом',exact:true}).click();
+ await expect(page.getByTestId('figma-pane')).toBeVisible();
+ await expect(page.getByTestId('site-pane')).toBeVisible();
+ const bounds=(await page.locator('.comparison-view').boundingBox())!;
+ const viewport=page.viewportSize()!;
+ expect(bounds.width).toBe(viewport.width);expect(bounds.height).toBe(viewport.height);
+ await page.keyboard.press('Escape');
+ await expect(expand).toBeVisible();
+ await expect(expand).toBeFocused();
+ await expand.click();
+ await page.getByRole('button',{name:'Выйти из полноэкранного режима',exact:true}).click();
+ await expect(page.locator('.comparison-view')).not.toHaveClass(/is-fullscreen/);
 });

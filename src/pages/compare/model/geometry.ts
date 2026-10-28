@@ -2,7 +2,7 @@ export type Size = { width: number; height: number };
 export type Point = { x: number; y: number };
 export type Rect = Point & Size;
 export type Camera = { center: Point; zoom: number };
-export type ComparisonMode = 'overlay' | 'slider' | 'side-by-side';
+export type ComparisonMode = 'overlay' | 'slider' | 'side-by-side' | 'diff';
 
 export function clampZoom(value: number): number {
   if (!Number.isFinite(value)) throw new Error('Масштаб должен быть конечным числом.');

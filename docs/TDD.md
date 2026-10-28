@@ -8,16 +8,16 @@
 
 Статическая React/Vite/TypeScript/MUI SPA. Оба изображения и замечания существуют только в памяти вкладки. Пользователь вручную выбирает скриншот сайта и экспорт Figma. Нет автоматического захвата, API Figma, backend, БД, MinIO, участников, cookie, URL стендов, shared projects и очередей. Никаких сетевых запросов после загрузки приложения для обработки изображений.
 
-Сохранить проверенный React/MUI toolchain и оформление, заменить корневой экран на инструмент сравнения. Удалить из активного репозитория apps/api, apps/capture, packages/contracts, Prisma, серверные тесты, server-specific scripts и Compose DB/storage. Старый код и спецификации восстановимы из Git; старые Docker volumes и пользовательские данные не удалять. Старый IMPLEMENTATION_LOG сохранить как историю, явно пометив смену требований.
+Приложение располагается в `src/`, тестовые изображения — в `tests/fixtures/images/`, браузерные сценарии — в `tests/e2e/`. Корневой `package.json` содержит все зависимости и непосредственные команды Vite, TypeScript, ESLint, Vitest и Playwright. Настройки TypeScript находятся в одном `tsconfig.json`.
 
-Root npm workspaces оставляет apps/web. Команды dev/start/build/typecheck/lint/test:unit/test:integration/test:e2e не требуют env/серверных секретов. test:integration запускает реальные проверки взаимодействия браузерных модулей/файлов, а не фиктивный exit. Если проверка интеграции реализована Playwright, использовать отдельный проект/tag без дублирования всего E2E. Пустые suites не считаются успехом.
+Команды `dev`, `start`, `build`, `typecheck`, `lint`, `test:unit`, `test:integration`, `test:e2e` выполняются из корня и не требуют серверных секретов. `test:browser` запускает весь набор браузерных сценариев; отдельные интеграционные сценарии используют тег `@integration`.
 
 Для локального запуска npm ci и npm run dev. Для локального просмотра production npm run build и npm run preview. Статический web-сервер раздаёт только dist. Опциональный Docker содержит только web/nginx и используется исключительно как удобный локальный preview на127.0.0.1:58080; он не обязателен. Nginx не имеет upstream API, runtime env или сетевых зависимостей.
 
 ## 2. Структура
 
 ```text
-apps/web/src/
+src/
   app/App.tsx                 # провайдер темы и единственная страница
   app/theme.ts
   pages/compare/
@@ -34,15 +34,15 @@ apps/web/src/
       CompareToolbar.tsx
       NotesPanel.tsx
     *.test.ts / model/*.test.ts
-apps/web/tests/               # дополнительные реальные unit/integration checks
- tests/e2e/                  # production browser acceptance + file fixtures
+tests/fixtures/images/        # изображения для тестов
+tests/e2e/                    # браузерные сценарии
 infra/Dockerfile.web          # необязательный static preview
 infra/web/default.conf
 infra/compose.yml             # только web
 README.md
 ```
 
-Минимальные app/pages слои, без entities/features/widgets и generic state framework. Одна страница владеет бизнес-логикой сравнения. React state/reducer достаточно; TanStack Query, router и contracts package больше не нужны. Сохранить точные версии совместимых существующих зависимостей; пересобрать lockfile npm, убрать server-only overrides/dependencies.
+Минимальные app/pages слои, без entities/features/widgets и generic state framework. Одна страница владеет бизнес-логикой сравнения. React state/reducer достаточно; Состояние интерфейса хранится локально в React. Сохранить точные версии совместимых существующих зависимостей; пересобрать lockfile npm, убрать server-only overrides/dependencies.
 
 ## 3. Модель в памяти и интерфейсы
 
